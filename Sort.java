@@ -33,13 +33,13 @@ class SortArray{
 		
 		for(int i = 0; arraySortCounter>0&& i<arraySize; i++) {
 			int maxIndexInPossibleRange = i;
-			for(int j = i; arraySortCounter>0&&j<=i+arraySortCounter&&j<arraySize; j++) {
+			for(int j = i; j<=i+arraySortCounter&&j<arraySize; j++) {
 				if(array[maxIndexInPossibleRange]<array[j]) {
 					maxIndexInPossibleRange = j;
 				}
-			}
+			}	
 			for(int s = maxIndexInPossibleRange; s > i; s--) {
-				swap(s-1, s);
+				swap(s-1, s);	
 			}
 		}
 		for(int i = 0; i<arraySize; i++) {
