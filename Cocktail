@@ -1,0 +1,161 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
+
+/**
+ * author : MoonDooo
+ * 칵테일 백준 #1033
+ */
+public class Main {
+    public static void main(String[] args) {
+        new Cocktail();
+    }
+}
+class Cocktail{
+    private Node[] nodes;
+    private int nodeNum;
+    private final Buf buf = new Buf();
+    private boolean isVisited[];
+    public Cocktail(){
+        nodeNum = buf.nextInt();
+        nodes = new Node[nodeNum];
+        isVisited = new boolean[nodeNum];
+        for(int i = 0; i<nodeNum; i++){
+            nodes[i] = new Node();
+        }
+        for(int i = 0; i<nodeNum-1; i++){
+            int nodeAIdx = buf.nextInt();
+            int nodeBIdx = buf.nextInt();
+            int front = buf.nextInt();
+            int back = buf.nextInt();
+            nodes[nodeAIdx].addLink(nodeBIdx, front, back);
+            nodes[nodeBIdx].addLink(nodeAIdx, back, front);
+        }
+
+        nodes[0].setValue(getNumerator(0, 1));
+        Arrays.fill(isVisited, false);
+        calculating(0, nodes[0].getValue());
+
+        /**
+         * 공약수 구하기
+         */
+        long pre = nodes[0].getValue();
+        long r = 1;
+        for(int i = 1; i<nodeNum; i++){
+            r = uclid(pre, nodes[i].getValue());
+            pre = r;
+        }
+
+        for(int i = 0; i <nodeNum; i++){
+            System.out.print(nodes[i].getValue()/r + " ");
+        }
+    }
+
+    private long uclid(long pre, long value) {
+        long x, y;
+        if(pre < value){
+            x = value;
+            y = pre;
+        }else{
+            x = pre;
+            y = value;
+        }
+
+        long r = 1;
+        long s;
+        while(r!=0){
+            r = x%y;
+            x = y;
+            if(r != 0){
+                y = r;
+            }
+        }
+        return y;
+    }
+
+    private void calculating(int nodeIdx, long value) {
+        isVisited[nodeIdx] = true;
+        nodes[nodeIdx].setValue(value);
+        for(int i = 0; i<nodes[nodeIdx].getLinkedNodeIdx().size(); i++){
+            if (!isVisited[nodes[nodeIdx].getLinkedNodeIdx().get(i)]){
+                long nextValue = value;
+                nextValue *= nodes[nodeIdx].getBack().get(i);
+                nextValue /= nodes[nodeIdx].getFront().get(i);
+                calculating(nodes[nodeIdx].getLinkedNodeIdx().get(i),nextValue);
+            }
+        }
+    }
+
+    public long getNumerator(int nodeIdx, long value){
+        isVisited[nodeIdx] = true;
+        for(int i = 0; i<nodes[nodeIdx].getLinkedNodeIdx().size(); i++){
+            int nextNodeIdx = nodes[nodeIdx].getLinkedNodeIdx().get(i);
+            if(!isVisited[nextNodeIdx]){
+                value = getNumerator(nextNodeIdx, value*nodes[nodeIdx].getFront().get(i));
+            }
+        }
+        return value;
+    }
+}
+class Node {
+    private final List<Integer> linkedNodeIdx;
+    private final List<Integer> front;
+    private final List<Integer> back;
+    private long value;
+
+    public void setValue(long value){
+        this.value = value;
+    }
+    public long getValue(){
+        return value;
+    }
+    public Node() {
+        linkedNodeIdx = new ArrayList<>();
+        front = new ArrayList<>();
+        back = new ArrayList<>();
+    }
+
+    public List<Integer> getLinkedNodeIdx() {
+        return linkedNodeIdx;
+    }
+
+    public List<Integer> getFront() {
+        return front;
+    }
+
+    public List<Integer> getBack() {
+        return back;
+    }
+
+    public void addLink(Integer nodeIdx, Integer front, Integer back) {
+        this.linkedNodeIdx.add(nodeIdx);
+        this.front.add(front);
+        this.back.add(back);
+    }
+}
+class Buf{
+    BufferedReader br;
+    StringTokenizer st;
+
+    Buf(){
+        br= new BufferedReader(new InputStreamReader(System.in));
+    }
+    String next(){
+        while(st==null||!st.hasMoreElements()){
+            try{
+                st= new StringTokenizer(br.readLine());
+            }catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return st.nextToken();
+    }
+    int nextInt(){
+        return Integer.parseInt(next());
+    }
+
+}
